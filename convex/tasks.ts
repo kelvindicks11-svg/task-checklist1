@@ -316,13 +316,14 @@ export const employeeStats = query({
       const total = activeTasks.filter((t) => t.assignedTo === name).length;
       const completed = completions.filter((c) => c.completedBy === name).length;
 
+      if (total === 0 && completed === 0) return null;
       return {
         name,
         completed,
-        total,
-        percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+        total: total || completed,
+        percentage: Math.round((completed / (total || completed)) * 100),
       };
-    }).filter((e) => e.total > 0);
+    }).filter((e): e is NonNullable<typeof e> => e !== null);
   },
 });
 
@@ -361,12 +362,13 @@ export const weeklyEmployeeStats = query({
       const total = dailyTasks.length * 7 + weeklyTasks.length;
       const completed = weekCompletions.filter((c) => c.completedBy === name).length;
 
+      if (total === 0 && completed === 0) return null;
       return {
         name,
         completed,
-        total: total || 1,
-        percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+        total: total || completed,
+        percentage: Math.round((completed / (total || completed)) * 100),
       };
-    }).filter((e) => e.total > 0 || e.completed > 0);
+    }).filter((e): e is NonNullable<typeof e> => e !== null);
   },
 });
