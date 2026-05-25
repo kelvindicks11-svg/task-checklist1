@@ -44,6 +44,7 @@ function Home(){
   const[mu,setMu]=useState(()=>{try{return sessionStorage.getItem('mu')==='1'}catch(e){return false}})
   const hMc=()=>{if(mu){setMg(!mg);setSt(false)}else setPp(true)}
   const hPs=()=>{setMu(true);try{sessionStorage.setItem('mu','1')}catch(e){}setPp(false);setMg(true);setSt(false)}
+  const hLock=()=>{setMu(false);try{sessionStorage.removeItem('mu')}catch(e){}setMg(false)}
   const gpw=()=>{const p=new Date(ws);p.setDate(p.getDate()-7);setWs(p)}
   const gnw=()=>{const n=new Date(ws);n.setDate(n.getDate()+7);setWs(n)}
   const gcw=()=>{setWs(getWeekStartDate());setToday(getTodayDayOfWeek())}
@@ -60,6 +61,7 @@ function Home(){
       <div className="flex items-center gap-1.5">
         <button onClick={()=>{setSt(!st);setMg(false)}} className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all ${st?'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20':'text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:shadow-sm'}`}>Stats</button>
         <button onClick={hMc} className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all ${mg&&mu?'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20':'text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:shadow-sm'}`}>Manager</button>
+        {mu&&<button onClick={hLock} className="rounded-lg px-2 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all">Lock</button>}
         <button onClick={td} className="rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:text-gray-700 dark:hover:text-gray-200 transition-all" aria-label="Toggle dark mode">{dark?<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>:<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>}</button>
       </div>
     </div></div></header>

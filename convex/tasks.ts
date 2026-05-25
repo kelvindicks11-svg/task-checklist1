@@ -268,23 +268,18 @@ export const uncompleteTask = mutation({
 
 // ─── Employee Stats ──────────────────────────────────────────────────────────
 
-const EMPLOYEES = [
-  "Alex", "Bailey", "Casey", "Drew", "Ellis",
-  "Finn", "Gale", "Hayden", "Jordan",
-];
-
 export const employees = query({
   args: {},
   returns: v.array(v.string()),
   handler: async (ctx) => {
     const dbEmps = await ctx.db.query("employees").order("asc").collect();
-    return dbEmps.length > 0 ? dbEmps.map((e) => e.name) : EMPLOYEES;
+    return dbEmps.map((e) => e.name);
   },
 });
 
 async function getEmployeeNames(ctx: any): Promise<string[]> {
   const dbEmps = await ctx.db.query("employees").order("asc").collect();
-  return dbEmps.length > 0 ? dbEmps.map((e: any) => e.name) : EMPLOYEES;
+  return dbEmps.map((e: any) => e.name);
 }
 
 export const employeeStats = query({
