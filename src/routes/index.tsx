@@ -23,8 +23,9 @@ function formatWeekStart(d:Date):string{return d.toLocaleDateString('en-GB',{day
 function getDateForDay(w:Date,i:number):Date{const d=new Date(w);d.setDate(d.getDate()+i);return d}
 
 function useDarkMode(){
-  const[d,setD]=useState(()=>typeof document!=='undefined'?document.documentElement.classList.contains('dark'):false)
-  const t=()=>{const n=!d;setD(n);document.documentElement.classList.toggle('dark',n);localStorage.setItem('theme',n?'dark':'light')}
+  const[d,setD]=useState(false)
+  useEffect(()=>setD(document.documentElement.classList.contains('dark')),[])
+  const t=()=>{const n=!document.documentElement.classList.contains('dark');setD(n);document.documentElement.classList.toggle('dark',n);localStorage.setItem('theme',n?'dark':'light')}
   return{dark:d,toggle:t}
 }
 
