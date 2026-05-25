@@ -229,7 +229,7 @@ function TaskList({type,day,dateStr,pf,af}:{type:TaskType;day:number;dateStr:str
   const ar=useMutation(api.tasks.archive)
   const comp=type==='daily'?dc:wc
   const cids=new Set(comp.map(x=>x.taskId))
-  const act=tasks.filter(t=>!t.archived).filter(t=>pf==='all'||t.priority===pf).filter(t=>af==='all'||t.assignedTo===af).sort((a,b)=>{const aD=cids.has(a._id),bD=cids.has(b._id);if(aD&&!bD)return 1;if(!aD&&bD)return -1;return a.order-b.order})
+  const act=tasks.filter(t=>!t.archived).filter(t=>pf==='all'||t.priority===pf).filter(t=>af==='all'||t.assignedTo===af||comp.some(c=>c.taskId===t._id&&c.completedBy===af)).sort((a,b)=>{const aD=cids.has(a._id),bD=cids.has(b._id);if(aD&&!bD)return 1;if(!aD&&bD)return -1;return a.order-b.order})
   const ht=(tid:Id<'tasks'>,cb:string)=>{c({taskId:tid,date:type==='daily'?dateStr:wss,completedBy:cb})}
   const[cb,setCb]=useState<Record<string,string>>({})
   useEffect(()=>{const d:Record<string,string>={};tasks.forEach(t=>{const e=comp.find(x=>x.taskId===t._id);d[t._id]=e?.completedBy||t.assignedTo});setCb(prev=>{const m={...d};Object.keys(prev).forEach(k=>{if(d[k]!==undefined)m[k]=prev[k]});return m})},[tasks,comp])
