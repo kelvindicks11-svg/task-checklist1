@@ -355,20 +355,20 @@ export const weeklyEmployeeStats = query({
     const weekCompletions = allCompletions.filter((c) => dates.includes(c.date));
     const empList = await getEmployeeNames(ctx);
 
-    return empList.map((name) => {
+    return empList.flatMap((name) => {
       const tasksForEmployee = activeTasks.filter((t) => t.assignedTo === name);
       const dailyTasks = tasksForEmployee.filter((t) => t.type === "daily");
       const weeklyTasks = tasksForEmployee.filter((t) => t.type === "weekly");
       const total = dailyTasks.length * 7 + weeklyTasks.length;
       const completed = weekCompletions.filter((c) => c.completedBy === name).length;
 
-      if (total === 0 && completed === 0) return null;
-      return {
+      if (total === 0 && completed === 0) return [];
+      return [{
         name,
         completed,
         total: total || completed,
         percentage: Math.round((completed / (total || completed)) * 100),
-      };
-    }).filter((e): e is NonNullable<typeof e> => e !== null);
+      }];
+    });
   },
 });
