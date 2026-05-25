@@ -40,6 +40,8 @@ function Home(){
   const[st,setSt]=useState(false)
   const[ws,setWs]=useState(()=>getWeekStartDate())
   const[pf,setPf]=useState<Priority|'all'>('all')
+  const[af,setAf]=useState<string>('all')
+  const{data:empList}=useSuspenseQuery(convexQuery(api.employees.list,{}))
   const[pp,setPp]=useState(false)
   const[mu,setMu]=useState(()=>{try{return sessionStorage.getItem('mu')==='1'}catch(e){return false}})
   const hMc=()=>{if(mu){setMg(!mg);setSt(false)}else setPp(true)}
@@ -79,7 +81,7 @@ function Home(){
           <button onClick={gnw} className="rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition-all" title="Next week"><svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg></button>
         </div>
       </div>
-      <div className="flex items-center gap-1 pb-2"><span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500 mr-1">Priority</span>{opts.map(p=><button key={p} onClick={()=>setPf(p)} className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all ${pf===p?pa[p]:pi[p]}`}>{pl[p]}</button>)}</div>
+      <div className="flex items-center gap-1 pb-2"><span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500 mr-1">Priority</span>{opts.map(p=><button key={p} onClick={()=>setPf(p)} className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all ${pf===p?pa[p]:pi[p]}`}>{pl[p]}</button>)}<span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500 ml-3 mr-1">Assignee</span><select value={af} onChange={e=>setAf(e.target.value)} className="rounded-md border border-gray-200/70 dark:border-gray-700/70 bg-white/50 dark:bg-gray-800/50 px-2 py-1 text-[11px] font-medium text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"><option value="all">All</option>{empList.map(n=><option key={n} value={n}>{n}</option>)}</select></div>
       <div className="flex overflow-x-auto gap-1 py-2 scrollbar-hide">{DAY_NAMES.map((n,i)=>{const d=getDateForDay(ws,i);const t=getDateString(d)===getTodayDateString();let c='flex-1 flex-shrink-0 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200';if(today===i)c+=' bg-gradient-to-b from-white to-blue-50 dark:from-gray-800 dark:to-blue-950/40 text-blue-700 dark:text-blue-300 shadow-md shadow-blue-500/10 ring-1 ring-blue-200/50 dark:ring-blue-800/50 scale-105';else if(t)c+=' text-gray-900 dark:text-white ring-1 ring-gray-200/70 dark:ring-gray-700/70 hover:ring-blue-300/50 dark:hover:ring-blue-700/50 hover:shadow-sm';else c+=' text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:shadow-sm';return<button key={i} onClick={()=>setToday(i)} className={c}><div className="text-[10px] font-medium uppercase tracking-wide opacity-70">{n.slice(0,3)}</div><div className="text-base font-bold leading-tight mt-0.5">{d.getDate()}</div></button>})}</div>
     </div></div>}
 
@@ -97,7 +99,7 @@ function Home(){
     <main className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-6">
       {st&&<StatsPanel date={sds} ws={ws}/>}
       {mg&&<ManagerPanel/>}
-      <TaskList type={tab} day={today} dateStr={sds} pf={pf}/>
+      <TaskList type={tab} day={today} dateStr={sds} pf={pf} af={af}/>
     </main>
     {pp&&<PasscodeModal onSuccess={hPs} onClose={()=>setPp(false)}/>}
   </div>)
@@ -215,7 +217,7 @@ function ManagerPanel(){
 }
 
 function gtc(p:string,ic:boolean){var b=p==="red"?"border-red-200/60 dark:border-red-900/40 bg-gradient-to-r from-red-50/70 via-red-50/40 to-transparent dark:from-red-950/30 dark:via-red-950/15":p==="amber"?"border-amber-200/60 dark:border-amber-900/40 bg-gradient-to-r from-amber-50/70 via-amber-50/40 to-transparent dark:from-amber-950/30 dark:via-amber-950/15":"border-green-200/60 dark:border-green-900/40 bg-gradient-to-r from-green-50/70 via-green-50/40 to-transparent dark:from-green-950/30 dark:via-green-950/15";return ic?"opacity-70 border-gray-100/30 dark:border-gray-800/30 bg-gray-50/20 dark:bg-gray-900/20":b}
-function TaskList({type,day,dateStr,pf}:{type:TaskType;day:number;dateStr:string;pf:Priority|'all'}){
+function TaskList({type,day,dateStr,pf,af}:{type:TaskType;day:number;dateStr:string;pf:Priority|'all';af:string}){
   const ws=getWeekStartDate()
   const wss=getDateString(ws)
   const{data:tasks}=useSuspenseQuery(convexQuery(api.tasks.list,{type,...(type==='daily'?{dayOfWeek:day}:{})}))
@@ -227,7 +229,7 @@ function TaskList({type,day,dateStr,pf}:{type:TaskType;day:number;dateStr:string
   const ar=useMutation(api.tasks.archive)
   const comp=type==='daily'?dc:wc
   const cids=new Set(comp.map(x=>x.taskId))
-  const act=tasks.filter(t=>!t.archived).filter(t=>pf==='all'||t.priority===pf).sort((a,b)=>{const aD=cids.has(a._id),bD=cids.has(b._id);if(aD&&!bD)return 1;if(!aD&&bD)return -1;return a.order-b.order})
+  const act=tasks.filter(t=>!t.archived).filter(t=>pf==='all'||t.priority===pf).filter(t=>af==='all'||t.assignedTo===af).sort((a,b)=>{const aD=cids.has(a._id),bD=cids.has(b._id);if(aD&&!bD)return 1;if(!aD&&bD)return -1;return a.order-b.order})
   const ht=(tid:Id<'tasks'>,cb:string)=>{c({taskId:tid,date:type==='daily'?dateStr:wss,completedBy:cb})}
   const[cb,setCb]=useState<Record<string,string>>({})
   useEffect(()=>{const d:Record<string,string>={};tasks.forEach(t=>{const e=comp.find(x=>x.taskId===t._id);d[t._id]=e?.completedBy||t.assignedTo});setCb(prev=>{const m={...d};Object.keys(prev).forEach(k=>{if(d[k]!==undefined)m[k]=prev[k]});return m})},[tasks,comp])
