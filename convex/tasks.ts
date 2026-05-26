@@ -312,18 +312,17 @@ export const employeeStats = query({
       .withIndex("by_date", (q) => q.eq("date", args.date))
       .collect();
 
-    return empList.map((name) => {
+    return empList.flatMap((name) => {
       const total = activeTasks.filter((t) => t.assignedTo === name).length;
       const completed = completions.filter((c) => c.completedBy === name).length;
-
-      if (total === 0 && completed === 0) return null;
-      return {
+      if (total === 0 && completed === 0) return [];
+      return [{
         name,
         completed,
-        total: total || completed,
-        percentage: Math.round((completed / (total || completed)) * 100),
-      };
-    }).filter((e): e is NonNullable<typeof e> => e !== null);
+        total,
+        percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+      }];
+    });
   },
 });
 
@@ -366,8 +365,8 @@ export const weeklyEmployeeStats = query({
       return [{
         name,
         completed,
-        total: total || completed,
-        percentage: Math.round((completed / (total || completed)) * 100),
+        total,
+        percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
       }];
     });
   },
