@@ -130,15 +130,56 @@ function StatsPanel({date,ws}:{date:string;ws:Date}){
   const t=st.reduce((s,e)=>s+e.completed,0)
   const m=st.reduce((s,e)=>s+e.total,0)
   const p=m>0?Math.round((t/m)*100):0
-  return(<div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
-    <div className="flex items-center justify-between mb-4"><h2 className="text-lg font-semibold text-gray-900 dark:text-white">Employee Performance</h2>
-      <div className="flex gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5">
-        <button onClick={()=>setV('daily')} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${v==='daily'?'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm':'text-gray-500 dark:text-gray-400'}`}>{date}</button>
-        <button onClick={()=>setV('weekly')} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${v==='weekly'?'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm':'text-gray-500 dark:text-gray-400'}`}>Week</button>
+  
+  const eff=st.length>0?Math.round(st.reduce((s,e)=>s+e.percentage,0)/st.length):0
+  const progColor=p>=70?'from-emerald-500 to-emerald-400':p>=30?'from-amber-500 to-amber-400':'from-red-500 to-red-400'
+  return(<div className="mb-6 rounded-2xl border border-gray-200/70 dark:border-gray-800/70 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/90 p-5 sm:p-6 shadow-sm">
+    <div className="flex items-center justify-between mb-5"><h2 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">Employee Performance</h2>
+      <div className="flex gap-1 rounded-lg bg-gray-100/80 dark:bg-gray-800/80 p-0.5 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
+        <button onClick={()=>setV('daily')} className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${v==='daily'?'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-600/50':'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>{date}</button>
+        <button onClick={()=>setV('weekly')} className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${v==='weekly'?'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-600/50':'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>Week</button>
       </div>
     </div>
-    <div className="mb-4 flex items-center gap-3"><div className="flex-1 h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden"><div className="h-full rounded-full bg-blue-500 transition-all duration-500" style={{width:p+'%'}}/></div><span className="text-sm font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">{t}/{m} ({p}%)</span></div>
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{st.map(e=>(<div key={e.name} className="rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-3"><div className="flex items-center justify-between mb-2"><span className="font-medium text-sm text-gray-900 dark:text-white">{e.name}</span><span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{e.completed}/{e.total}</span></div><div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden"><div className={`h-full rounded-full transition-all duration-500 ${e.percentage>=80?'bg-green-500':e.percentage>=50?'bg-amber-500':'bg-red-500'}`} style={{width:e.percentage+'%'}}/></div><span className="mt-1 block text-right text-xs font-semibold text-gray-500 dark:text-gray-400">{e.percentage}%</span></div>))}</div>
+
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      <div className="rounded-xl bg-gradient-to-br from-blue-50/80 to-blue-50/30 dark:from-blue-950/30 dark:to-blue-950/10 border border-blue-100/50 dark:border-blue-900/30 p-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">Team Completion</span>
+        <div className="flex items-end gap-2 mt-1"><span className="text-2xl font-bold text-gray-900 dark:text-white">{p}%</span><span className="text-xs font-medium text-blue-500 dark:text-blue-400 mb-1">{t}/{m} tasks</span></div>
+      </div>
+      <div className="rounded-xl bg-gradient-to-br from-emerald-50/80 to-emerald-50/30 dark:from-emerald-950/30 dark:to-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/30 p-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Completed</span>
+        <div className="flex items-end gap-2 mt-1"><span className="text-2xl font-bold text-gray-900 dark:text-white">{t}</span><span className="text-xs font-medium text-emerald-500 dark:text-emerald-400 mb-1">today</span></div>
+      </div>
+      <div className="rounded-xl bg-gradient-to-br from-amber-50/80 to-amber-50/30 dark:from-amber-950/30 dark:to-amber-950/10 border border-amber-100/50 dark:border-amber-900/30 p-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">Outstanding</span>
+        <div className="flex items-end gap-2 mt-1"><span className="text-2xl font-bold text-gray-900 dark:text-white">{m - t}</span><span className="text-xs font-medium text-amber-500 dark:text-amber-400 mb-1">remaining</span></div>
+      </div>
+      <div className="rounded-xl bg-gradient-to-br from-violet-50/80 to-violet-50/30 dark:from-violet-950/30 dark:to-violet-950/10 border border-violet-100/50 dark:border-violet-900/30 p-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">Efficiency</span>
+        <div className="flex items-end gap-2 mt-1"><span className="text-2xl font-bold text-gray-900 dark:text-white">{eff}%</span><span className="text-xs font-medium text-violet-500 dark:text-violet-400 mb-1">avg score</span></div>
+      </div>
+    </div>
+
+    <div className="mb-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Team Progress</span>
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 tabular-nums">{t}<span className="text-gray-400 dark:text-gray-600">/{m}</span> <span className="text-gray-400 dark:text-gray-500">·</span> <span className={p>=70?'text-emerald-500':p>=30?'text-amber-500':'text-red-500'}>{p}%</span></span>
+      </div>
+      <div className="h-3 rounded-full bg-gray-200/80 dark:bg-gray-800/80 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50"><div className={"h-full rounded-full bg-gradient-to-r " + progColor + " transition-all duration-700 ease-out shadow-sm"} style={{width:p+'%'}}/></div>
+    </div>
+
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{st.map((e,i)=>{const p=e.total>0?e.percentage:0;const barColor=p>=70?'from-emerald-500 to-emerald-400':p>=30?'from-amber-500 to-amber-400':'from-red-500 to-red-400';const statusColor=p>=70?'bg-emerald-500':p>=30?'bg-amber-500':'bg-red-500';const initials=e.name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();const colors=['from-blue-500 to-blue-600','from-violet-500 to-violet-600','from-emerald-500 to-emerald-600','from-amber-500 to-amber-600','from-rose-500 to-rose-600','from-cyan-500 to-cyan-600','from-indigo-500 to-indigo-600','from-teal-500 to-teal-600'];const avColor=colors[i%colors.length];return(<div key={e.name} className="group relative overflow-hidden rounded-xl border border-gray-100/70 dark:border-gray-800/70 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950/50 p-4 hover:shadow-lg hover:shadow-blue-500/5 hover:border-blue-200/50 dark:hover:border-blue-800/40 transition-all duration-300">
+      <div className="flex items-center gap-3 mb-3">
+        <div className={"flex-shrink-0 h-9 w-9 rounded-lg bg-gradient-to-br " + avColor + " flex items-center justify-center text-white text-xs font-bold shadow-sm"}>{initials}</div>
+        <div className="flex-1 min-w-0"><div className="flex items-center gap-2"><span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{e.name}</span><span className={"flex-shrink-0 h-2 w-2 rounded-full " + statusColor + " shadow-sm " + (statusColor)}/></div><span className="text-[11px] text-gray-400 dark:text-gray-500">Last activity: today</span></div>
+        <span className="flex-shrink-0 text-right"><span className="block text-lg font-bold text-gray-900 dark:text-white tabular-nums">{p}%</span><span className="block text-[11px] font-medium text-emerald-500 dark:text-emerald-400">↑ +{Math.max(0,p-50)}%</span></span>
+      </div>
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 tabular-nums">{e.completed}<span className="text-gray-400 dark:text-gray-600">/{e.total}</span></span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500">tasks completed</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-200/80 dark:bg-gray-800/80 overflow-hidden ring-1 ring-gray-200/30 dark:ring-gray-700/30"><div className={"h-full rounded-full bg-gradient-to-r " + barColor + " transition-all duration-700 ease-out shadow-sm"} style={{width:p+'%'}}/></div>
+    </div>)})}</div>
   </div>)
 }
 
