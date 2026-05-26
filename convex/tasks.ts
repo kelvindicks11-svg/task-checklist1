@@ -280,14 +280,10 @@ export const employees = query({
 async function getEmployeeNames(ctx: any): Promise<string[]> {
   const dbEmps = await ctx.db.query("employees").order("asc").collect();
   const empSet = new Set<string>(dbEmps.map((e: any) => e.name));
-  // Also include names from task assignments and completions
+  // Include names from task assignments only
   const allTasks = await ctx.db.query("tasks").collect();
   for (const t of allTasks) {
     if (t.assignedTo && t.assignedTo !== "Un-assigned") empSet.add(t.assignedTo);
-  }
-  const allComps = await ctx.db.query("completions").collect();
-  for (const c of allComps) {
-    if (c.completedBy) empSet.add(c.completedBy);
   }
   return [...empSet].sort() as string[];
 }
